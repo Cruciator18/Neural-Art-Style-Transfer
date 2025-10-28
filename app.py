@@ -9,7 +9,7 @@ from PIL import Image
 import io
 import copy
 
-# --- Streamlit Configuration ---
+# Streamlit Configuration 
 st.set_page_config(layout="wide")
 st.title(" Neural Style Transfer")
 
@@ -21,14 +21,14 @@ BETA = st.sidebar.select_slider(
     options=[1e4, 1e5, 1e6, 1e7, 1e8],
     value=1e6
 )
-NUM_STEPS = st.sidebar.slider("Optimization Steps", 100, 1000, 400, step=50) # Increased max steps
+NUM_STEPS = st.sidebar.slider("Optimization Steps", 100, 1000, 400, step=50) 
 LEARNING_RATE = st.sidebar.select_slider(
     "Learning Rate",
-    options=[0.001, 0.005, 0.01, 0.015, 0.02, 0.05], # Added 0.015
+    options=[0.001, 0.005, 0.01, 0.015, 0.02, 0.05], 
     value=0.015
 )
 
-# --- Device Setup ---
+#  Device Setup 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 st.sidebar.write(f"Using device: **{device}**")
 if str(device) == "cuda":
@@ -36,10 +36,10 @@ if str(device) == "cuda":
 else:
     st.sidebar.warning("CUDA (GPU) not available, using CPU. This will be very slow!")
 
-# --- Image Loading & Preprocessing ---
+#Image Loading & Preprocessing 
 
 imagenet_mean = torch.tensor([0.485, 0.456, 0.406]).to(device)
-# Corrected typo in std deviation from user script
+
 imagenet_std = torch.tensor([0.229, 0.224, 0.225]).to(device) 
 
 def get_loader(image_size):
@@ -71,7 +71,7 @@ def tensor_to_pil(tensor):
     image = transforms.ToPILImage()(image)
     return image
 
-# --- VGG Model & Feature Extraction ---
+# VGG Model & Feature Extraction 
 
 @st.cache_resource
 def get_vgg_model():
@@ -103,14 +103,14 @@ class VGGFeatureExtractor(nn.Module):
                 style_features_out[name] = x
         return content_features_out, style_features_out
 
-# --- Style Loss (Gram Matrix) ---
+#Style Loss (Gram Matrix) 
 def gram_matrix(input_tensor):
     B, C, H, W = input_tensor.size()
     features = input_tensor.view(C, H * W)
     G = torch.mm(features, features.t())
     return G.div(C * H * W)
 
-# --- Main Style Transfer Function ---
+#  Main Style Transfer Function 
 def run_style_transfer(content_img_tensor, style_img_tensor, model_extractor, num_steps, alpha, beta, lr):
     with torch.no_grad():
         target_content_features, _ = model_extractor(content_img_tensor)
@@ -148,7 +148,7 @@ def run_style_transfer(content_img_tensor, style_img_tensor, model_extractor, nu
     progress_bar.empty()
     return target_image.detach()
 
-# --- Streamlit UI Layout ---
+#  Streamlit UI Layout 
 
 col1, col2 = st.columns(2)
 
